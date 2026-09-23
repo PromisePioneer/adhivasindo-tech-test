@@ -10,9 +10,9 @@ class ExternalStudentService
 {
     private Client $client;
 
-    public function __construct()
+    public function __construct(?Client $client = null)
     {
-        $this->client = new Client(['timeout' => 30]);
+        $this->client = $client ?? new Client(['timeout' => 30]);
     }
 
     public function search(string $field, string $value): array

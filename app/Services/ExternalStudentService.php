@@ -41,17 +41,32 @@ class ExternalStudentService
     private function parse(string $data): array
     {
         $students = [];
+        $lines = explode("\n", trim($data));
 
-        foreach (explode("\n", trim($data)) as $line) {
-            $parts = array_map('trim', explode('|', trim($line)));
+        if (empty($lines)) {
+            return [];
+        }
 
-            if (count($parts) >= 3 && $parts[0] !== 'NAMA') {
-                $students[] = [
-                    'nama' => $parts[0],
-                    'nim' => $parts[1],
-                    'ymd' => $parts[2],
-                ];
+        // Parse header to determine field order
+        $header = array_map('strtolower', array_map('trim', explode('|', trim($lines[0]))));
+        $fieldMap = array_flip($header);
+
+        foreach (array_slice($lines, 1) as $line) {
+            $line = trim($line);
+            if (empty($line)) {
+                continue;
             }
+
+            $parts = array_map('trim', explode('|', $line));
+            if (count($parts) < 3) {
+                continue;
+            }
+
+            $students[] = [
+                'nama' => $parts[$fieldMap['nama'] ?? 0] ?? '',
+                'nim' => $parts[$fieldMap['nim'] ?? 1] ?? '',
+                'ymd' => $parts[$fieldMap['ymd'] ?? 2] ?? '',
+            ];
         }
 
         return $students;
